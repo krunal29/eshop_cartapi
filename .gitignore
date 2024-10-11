@@ -1,0 +1,25 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/Business/eshop_cartapi.Business/bin
+/Business/eshop_cartapi.Business/obj
+/Business/eshop_cartapi.Interfaces/bin
+/Business/eshop_cartapi.Interfaces/obj
+/Business/eshop_cartapi.Mapper/bin
+/Business/eshop_cartapi.Mapper/obj
+/Business/eshop_cartapi.Repositories/bin
+/Business/eshop_cartapi.Repositories/obj
+/Business/eshop_cartapi.Services/bin
+/Business/eshop_cartapi.Services/obj
+/Business/eshop_cartapi.UoW/bin
+/Business/eshop_cartapi.UoW/obj
+/Database/eshop_cartapi.Domain/bin
+/Database/eshop_cartapi.Domain/obj
+/Database/eshop_cartapi.Migrations/bin
+/Database/eshop_cartapi.Migrations/obj
+/eshop_cartapi.API/bin
+/eshop_cartapi.API/obj
+/eshop_cartapi.API/uploads/RequestLog/2024_04_23
+/Business/eshop_cartapi.Resources
