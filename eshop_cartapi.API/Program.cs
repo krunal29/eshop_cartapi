@@ -15,16 +15,6 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using eshop_cartapi.API.Filters;
-using eshop_cartapi.Business.Helpers;
-using eshop_cartapi.Domain;
-using eshop_cartapi.Domain.Models;
-using eshop_cartapi.Interfaces.Background;
-using eshop_cartapi.Interfaces.Repositories;
-using eshop_cartapi.Interfaces.Services;
-using eshop_cartapi.Migrations.DbMigrations;
-using eshop_cartapi.Repositories;
-using eshop_cartapi.Services;
-using eshop_cartapi.UoW;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -37,26 +27,14 @@ var builder = WebApplication.CreateBuilder(args);
 #region  Configure Services 
 
 builder.Services.AddMvc();
-builder.Services.AddDbContext<eshop_cartapiContext>(options => options.UseLazyLoadingProxies(false).UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-}).AddEntityFrameworkStores<eshop_cartapiContext>().AddDefaultTokenProviders();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 RegisterRequestLocalizationOptions(builder.Services);
 RegisterNewtonsoftJson(builder.Services);
-RegisterJwt(builder.Services);
-RegisterDI(builder.Services);
 RegisterHangfire(builder);
 RegisterSwagger(builder.Services);
 RegisterCors(builder);
-RegisterFluentMigration(builder);
 
 #endregion
 
@@ -119,12 +97,6 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
     endpoints.MapHangfireDashboard();
 });
-app.Migrate();
-AppSettings.Initialize(builder.Configuration);
-MailSettings.Initialize(builder.Configuration);
-UnitOfWorkHelper.Initialize(builder.Configuration);
-MemoryCacheHelper.Initialize();
-Jwt.Initialize(builder.Configuration);
 
 //app.Lifetime.ApplicationStarted.Register(OnStarted); //If any database call needed on start up api
 
@@ -170,69 +142,6 @@ static void RegisterNewtonsoftJson(IServiceCollection services)
     });
 }
 
-static void RegisterJwt(IServiceCollection services)
-{
-    services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(option =>
-    {
-        option.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = new Jwt().Issuer,
-            ValidAudience = new Jwt().Issuer,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new Jwt().Key))
-        };
-    });
-}
-
-static void RegisterDI(IServiceCollection services)
-{
-    services.AddTransient<IUnitOfWork, UnitOfWork>();
-    RegisterHelpers(services);
-    RegisterServices(services);
-    RegisterRepositories(services);
-    RegisterBackgroundServices(services);
-}
-static void RegisterHelpers(IServiceCollection services)
-{
-    services.AddSingleton<IMemoryCacheService, MemoryCacheService>();
-    //services.AddSingleton<IFileHelper, FileHelper>();
-}
-
-static void RegisterServices(IServiceCollection services)
-{
-    //services.AddScoped<IPersonService, PersonService>();
-    services.AddScoped<ICartService, CartService>();
-
-
-    //services.AddScoped<IRoleModuleService, RoleModuleService>();
-}
-
-static void RegisterRepositories(IServiceCollection services)
-{
-    //services.AddScoped<IPersonRepository, PersonRepository>();
-    services.AddScoped<ICartRepository, CartRepository>();
-
-
-    //services.AddScoped<IRoleRepository, RoleRepository>();
-    //services.AddScoped<IModuleRepository, ModuleRepository>();
-    services.AddScoped<IAccessModuleRepository, AccessModuleRepository>();
-    //services.AddScoped<IRoleModuleRepository, RoleModuleRepository>();
-}
-
-static void RegisterBackgroundServices(IServiceCollection services)
-{
-    services.AddScoped<IBackgroundService, eshop_cartapi.Services.BackgroundService>();
-    //services.AddScoped<IBackgroundMailerJobs, BackgroundMailerJobs>();
-}
 
 static void RegisterHangfire(WebApplicationBuilder builder)
 {
@@ -283,14 +192,6 @@ static void RegisterCors(WebApplicationBuilder builder)
     });
 }
 
-static void RegisterFluentMigration(WebApplicationBuilder builder)
-{
-    builder.Services.AddLogging(c => c.AddFluentMigratorConsole())
-                        .AddFluentMigratorCore()
-                        .ConfigureRunner(c => c
-                            .AddSqlServer2012()
-                            .WithGlobalConnectionString(builder.Configuration.GetConnectionString("DefaultConnection"))
-                            .ScanIn(Assembly.GetAssembly(typeof(MigrationExtension))));
-}
+
 
 #endregion

@@ -1,5 +1,4 @@
 using Hangfire.Dashboard;
-using eshop_cartapi.Business.Helpers;
 
 namespace eshop_cartapi.API.Filters
 {
@@ -7,7 +6,7 @@ namespace eshop_cartapi.API.Filters
     {
         public bool Authorize(DashboardContext context)
         {
-            return new AppSettings().EnableHangfire;
+            return false;
         }
     }
 }

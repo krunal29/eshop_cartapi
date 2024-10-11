@@ -38,16 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Business\eshop_cartapi.Business\eshop_cartapi.Business.csproj" />
-    <ProjectReference Include="..\Business\eshop_cartapi.Interfaces\eshop_cartapi.Interfaces.csproj" />
-    <ProjectReference Include="..\Business\eshop_cartapi.Mapper\eshop_cartapi.Mapper.csproj" />
-    <ProjectReference Include="..\Business\eshop_cartapi.Services\eshop_cartapi.Services.csproj" />
-    <ProjectReference Include="..\Business\eshop_cartapi.UoW\eshop_cartapi.UoW.csproj" />
-    <ProjectReference Include="..\Database\eshop_cartapi.Domain\eshop_cartapi.Domain.csproj" />
-    <ProjectReference Include="..\Database\eshop_cartapi.Migrations\eshop_cartapi.Migrations.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <Folder Include="Helpers\" />
     <Folder Include="uploads\" />
   </ItemGroup>
 
