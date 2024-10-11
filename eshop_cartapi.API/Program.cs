@@ -1,6 +1,3 @@
-using FluentMigrator.Runner;
-using Hangfire;
-using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,7 +29,6 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 RegisterRequestLocalizationOptions(builder.Services);
 RegisterNewtonsoftJson(builder.Services);
-RegisterHangfire(builder);
 RegisterSwagger(builder.Services);
 RegisterCors(builder);
 
@@ -86,16 +82,10 @@ app.UseRouting();
 app.UseCors("_myAllowSpecificOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseHangfireDashboard("/hangfire", new DashboardOptions()
-{
-    AppPath = null,
-    DashboardTitle = "Hangfire Dashboard",
-    Authorization = new[] { new HangfireAuthorizationFilter() }
-});
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHangfireDashboard();
 });
 
 //app.Lifetime.ApplicationStarted.Register(OnStarted); //If any database call needed on start up api
@@ -143,22 +133,7 @@ static void RegisterNewtonsoftJson(IServiceCollection services)
 }
 
 
-static void RegisterHangfire(WebApplicationBuilder builder)
-{
-    builder.Services.AddHangfire(configuration => configuration
-                    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-                    .UseSimpleAssemblyNameTypeSerializer()
-                    .UseRecommendedSerializerSettings()
-                    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
-                    {
-                        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-                        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-                        QueuePollInterval = TimeSpan.Zero,
-                        UseRecommendedIsolationLevel = true,
-                        DisableGlobalLocks = true
-                    }).WithJobExpirationTimeout(TimeSpan.FromDays(7)));
-    builder.Services.AddHangfireServer();
-}
+
 
 static void RegisterSwagger(IServiceCollection services)
 {
