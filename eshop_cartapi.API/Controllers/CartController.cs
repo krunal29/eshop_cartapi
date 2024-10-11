@@ -22,6 +22,7 @@ namespace eshop_cartapi.API.Controllers
         [Route("GetAll")]
         public async Task<object> GetAll()
         {
+            int a = 1;
             return "";
         }
 
@@ -31,5 +32,8 @@ namespace eshop_cartapi.API.Controllers
             return "";
         }
 
+        public void getData()
+        { 
+        }
     }
 }
