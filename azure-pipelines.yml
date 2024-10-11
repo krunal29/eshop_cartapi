@@ -1,17 +1,82 @@
-# ASP.NET Core
-# Build and test ASP.NET Core projects targeting .NET Core.
-# Add steps that run tests, create a NuGet package, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+# Azure DevOps YAML pipeline to build a .NET Core project, analyze with SonarQube, and trigger on pull request to 'develop' branch
 
-trigger:
-- develop
+trigger: 
+  - develop  # No build on push to branches
+
+pr:
+  branches:
+    include:
+      - develop  # Trigger pipeline when a pull request is created/updated targeting the develop branch
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'  # Use the latest Ubuntu agent for .NET and SonarQube tasks
 
 variables:
   buildConfiguration: 'Release'
+  SONAR_SCANNER_MODE: 'CLI'  # SonarQube scanner mode
 
 steps:
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'dotnet build $(buildConfiguration)'
+  # 1. Check out code from GitHub
+  - checkout: self
+    persistCredentials: true  # Ensures GitHub credentials persist in the pipeline
+
+  # 2. Install .NET Core SDK
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '8.x'  # Adjust the .NET Core version as needed
+
+  # 3. Install dependencies (restore NuGet packages)
+  - task: NuGetToolInstaller@1
+    displayName: 'Use NuGet'
+
+  - task: NuGetCommand@2
+    inputs:
+      command: 'restore'
+      restoreSolution: '**/*.sln'
+
+  # 4. Build the .NET Core project
+  - task: DotNetCoreCLI@2
+    displayName: 'Build the project'
+    inputs:
+      command: 'build'
+      projects: '**/*.sln'
+      arguments: '--configuration $(buildConfiguration)'
+
+  # 5. Begin SonarQube analysis
+  # - task: SonarQubePrepare@5
+  #   inputs:
+  #     SonarQube: 'SonarQube service connection'  # Name of your service connection for SonarQube in Azure DevOps
+  #     scannerMode: 'CLI'
+  #     configMode: 'manual'
+  #     cliProjectKey: 'your_project_key'  # Replace with your SonarQube project key
+  #     cliProjectName: 'your_project_name'  # Replace with your SonarQube project name
+  #     cliSources: '.'  # Source directory for analysis
+  #     extraProperties: |
+  #       sonar.exclusions=**/test/**/*  # Exclude test files if needed
+  #       sonar.cs.vscoveragexml.reportsPaths=$(Build.SourcesDirectory)/**/*.coveragexml
+  #       sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/**/coverage.opencover.xml
+
+  # 6. Run tests and generate code coverage report
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Tests and Collect Coverage'
+    inputs:
+      command: 'test'
+      projects: '**/*.sln'
+      arguments: '--configuration $(buildConfiguration) --collect:"Code coverage"'
+
+  # 7. End SonarQube analysis (send results to SonarQube server)
+  # - task: SonarQubeAnalyze@5
+  #   displayName: 'Run SonarQube Analysis'
+
+  # 8. Publish SonarQube Quality Gate Result to Azure DevOps
+  # - task: SonarQubePublish@5
+  #   inputs:
+  #     pollingTimeoutSec: '300'  # Timeout to wait for the SonarQube analysis result
+
+  # 9. Publish build artifacts (optional, based on your project needs)
+  # - task: PublishBuildArtifacts@1
+  #   inputs:
+  #     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+  #     ArtifactName: 'drop'
+  #     publishLocation: 'Container'
