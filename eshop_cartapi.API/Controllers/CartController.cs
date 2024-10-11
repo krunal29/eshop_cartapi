@@ -11,8 +11,6 @@ namespace eshop_cartapi.API.Controllers
     public class CartController : BaseApiController
     {
         private readonly IHtmlLocalizer<CartController> _localizer;
-        
-
         public CartController(IHtmlLocalizer<CartController> localizer)
         {
             _localizer = localizer;
@@ -22,6 +20,7 @@ namespace eshop_cartapi.API.Controllers
         [Route("GetAll")]
         public async Task<object> GetAll()
         {
+            int a = 1;
             return "";
         }
 
@@ -31,5 +30,9 @@ namespace eshop_cartapi.API.Controllers
             return "";
         }
 
+        public void getData()
+        { 
+
+        }
     }
 }
