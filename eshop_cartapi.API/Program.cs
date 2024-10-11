@@ -1,13 +1,8 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -15,28 +10,18 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Text;
-
 var builder = WebApplication.CreateBuilder(args);
-
 #region  Configure Services 
-
 builder.Services.AddMvc();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
 RegisterRequestLocalizationOptions(builder.Services);
 RegisterNewtonsoftJson(builder.Services);
 RegisterSwagger(builder.Services);
 RegisterCors(builder);
-
 #endregion
-
 var app = builder.Build();
-
 #region Configure
-
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -52,13 +37,11 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint(url: "v1/swagger.json", name: "API V1");
 });
 app.UseHttpsRedirection();
-
 //If uploads folder not exist then create
 if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "uploads")))
 {
     Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "uploads"));
 }
-
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = (context =>
@@ -69,15 +52,12 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads",
     ServeUnknownFileTypes = true
 });
-
 app.UseDirectoryBrowser(new DirectoryBrowserOptions
 {
     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "uploads")),
     RequestPath = "/uploads"
 });
-
 app.UseRouting();
-//Enable CORS
 app.UseCors("_myAllowSpecificOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
@@ -86,24 +66,9 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
-
-//app.Lifetime.ApplicationStarted.Register(OnStarted); //If any database call needed on start up api
-
 app.Run();
-
-//If any database call needed on start up api
-//async void OnStarted()
-//{
-//    using (var unitOfWork = new UnitOfWorkHelper().GetUnitOfWork())
-//    {
-
-//    }
-//}
-
 #endregion
-
 #region  Configure Services Functions
-
 static void RegisterRequestLocalizationOptions(IServiceCollection services)
 {
     services.AddLocalization(opt => { opt.ResourcesPath = "Resource"; });
@@ -120,7 +85,6 @@ static void RegisterRequestLocalizationOptions(IServiceCollection services)
                                     opt.SupportedUICultures = supportedCulters;
                                 });
 }
-
 static void RegisterNewtonsoftJson(IServiceCollection services)
 {
     services.AddControllers().AddNewtonsoftJson(options =>
@@ -130,10 +94,6 @@ static void RegisterNewtonsoftJson(IServiceCollection services)
         options.SerializerSettings.ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() };
     });
 }
-
-
-
-
 static void RegisterSwagger(IServiceCollection services)
 {
     services.AddSwaggerGen(c =>
@@ -149,7 +109,6 @@ static void RegisterSwagger(IServiceCollection services)
         c.AddSecurityRequirement(new OpenApiSecurityRequirement { { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, new string[] { } } });
     });
 }
-
 static void RegisterCors(WebApplicationBuilder builder)
 {
     var webUrl = builder.Configuration.GetSection("Urls:FrontEnd").Value;
@@ -165,7 +124,4 @@ static void RegisterCors(WebApplicationBuilder builder)
             );
     });
 }
-
-
-
 #endregion
