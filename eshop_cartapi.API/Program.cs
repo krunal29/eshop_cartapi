@@ -11,7 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using eshop_cartapi.API.Filters;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
